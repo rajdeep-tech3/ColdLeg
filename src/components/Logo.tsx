@@ -15,7 +15,7 @@ export function Logo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
         <Snowflake size={s.icon} />
       </div>
       <div className="leading-tight">
-        <div className={`font-bold text-gray-800 ${s.text}`}>Kisan Cold Connect</div>
+        <div className={`font-bold text-gray-800 ${s.text}`}>ColdLeg</div>
         <div className={`text-gray-500 font-medium ${s.sub}`}>Post-Harvest Loss Prevention</div>
       </div>
     </div>

@@ -120,7 +120,7 @@ type TranslationKey =
 type Translations = Record<TranslationKey, string>;
 
 const en: Translations = {
-  appName: 'Kisan Cold Connect',
+  appName: 'ColdLeg',
   tagline: 'Post-Harvest Loss Prevention via Micro-Logistics Matching',
   landingSubtitle: 'Find nearby refrigerated transport. Reduce food loss. Reach your local mandi.',
   imFarmer: "I'm a Farmer",
@@ -196,7 +196,7 @@ const en: Translations = {
   useEmptyCapacity: 'Use Existing Empty Capacity',
   affordableTransport: 'Affordable Local Transport',
   stopEmptyTrips: 'Stop Empty Trips. Save Fresh Produce.',
-  landingHeroSubtitle: 'Kisan Cold Connect matches small farmers with refrigerated vehicles returning with unused capacity.',
+  landingHeroSubtitle: 'ColdLeg matches small farmers with refrigerated vehicles returning with unused capacity.',
   farmerFlow: 'FARMER',
   smartMatching: 'SMART MATCHING',
   emptyVehicle: 'EMPTY RETURN VEHICLE',
