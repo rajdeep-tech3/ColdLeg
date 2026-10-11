@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { LogOut, Truck, User, CheckCircle2, X, MapPin, Navigation, Clock, Play } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 import { t } from '@/lib/i18n';
@@ -6,9 +6,9 @@ import { Logo } from '@/components/Logo';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { DemoBadge } from '@/components/DemoBadge';
 import { MatchCard } from '@/components/MatchCard';
-import { MapView } from '@/components/MapView';
+import { DriverLiveMap } from '@/components/DriverLiveMap';
 import { findBestFarmersForDriver, type DriverFarmerMatch } from '@/lib/matching';
-import { getDistanceKm, getCoordinates } from '@/data/locations';
+import { getDistanceKm } from '@/data/locations';
 import type { TransportRequest } from '@/types';
 
 type View = 'home' | 'matches' | 'requests' | 'trip';
@@ -19,17 +19,19 @@ export function DriverDashboard() {
   const [matches, setMatches] = useState<DriverFarmerMatch[]>([]);
   const [showAllMatches, setShowAllMatches] = useState(false);
 
-  if (!currentDriver) return null;
-
   useEffect(() => {
     refreshRequests();
   }, [refreshRequests]);
 
   const handleFindMatches = useCallback(() => {
+    if (!currentDriver) return;
     const results = findBestFarmersForDriver(currentDriver, farmers);
     setMatches(results);
     setView('matches');
   }, [currentDriver, farmers]);
+
+  // All hooks are above this line, so this early return is safe
+  if (!currentDriver) return null;
 
   const toggleAvailability = () => {
     updateCurrentDriver({ ...currentDriver, available: !currentDriver.available });
@@ -223,14 +225,9 @@ export function DriverDashboard() {
                   )}
                 </div>
 
+                {/* Live GPS map (replaces the old MapView) */}
                 <div className="mt-4">
-                  <MapView
-                    points={[
-                      { coord: getCoordinates(activeTrip.pickup), label: 'Pickup', color: '#22c55e' },
-                      { coord: getCoordinates(activeTrip.destination), label: 'Mandi', color: '#3b82f6' },
-                    ]}
-                    height={140}
-                  />
+                  <DriverLiveMap trip={activeTrip} />
                 </div>
               </div>
             )}
