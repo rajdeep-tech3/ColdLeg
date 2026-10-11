@@ -37,7 +37,7 @@ export function DriverDashboard() {
 
   const handleAcceptRequest = (req: TransportRequest) => {
     acceptRequest(req);
-    setView('trip');
+    setView('home');
   };
 
   const handleStartTrip = () => {

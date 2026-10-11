@@ -28,17 +28,6 @@ function write(key: string, data: unknown): void {
   }
 }
 
-export function initStorage(): void {
-  if (localStorage.getItem(KEYS.initialized)) return;
-  const farmers = generateSeedFarmers();
-  const drivers = generateSeedDrivers();
-  write(KEYS.farmers, farmers);
-  write(KEYS.drivers, drivers);
-  write(KEYS.requests, []);
-  write(KEYS.trips, []);
-  localStorage.setItem(KEYS.initialized, 'true');
-}
-
 export function getFarmers(): Farmer[] {
   return read<Farmer[]>(KEYS.farmers, []);
 }
@@ -54,6 +43,71 @@ export function saveFarmers(farmers: Farmer[]): void {
 export function saveDrivers(drivers: Driver[]): void {
   write(KEYS.drivers, drivers);
 }
+
+// ---------------------------------------------------------------------------
+// DEMO DATA: a farmer and a driver in the same location (Sangrur)
+// Farmer login: KCC-F-901 / demo123
+// Driver login: KCC-D-901 / demo123
+// ---------------------------------------------------------------------------
+
+function ensureDemoData(): void {
+  if (localStorage.getItem('kcc_demo') === 'v2') return;
+
+  const demoFarmer: Farmer = {
+    id: 'KCC-F-901',
+    fullName: 'Rajdeep Singh',
+    mobile: '9812345678',
+    village: 'Sangrur',
+    district: 'Sangrur',
+    state: 'Punjab',
+    farmLocation: 'Sangrur Village, Sangrur',
+    coordinates: { lat: 30.2458, lng: 75.8421 },
+    cropType: 'Tomato',
+    cropQuantity: 1200,
+    preferredMandi: 'Khanna Grain Market',
+    password: 'demo123',
+    verified: true,
+  };
+
+  const demoDriver: Driver = {
+    id: 'KCC-D-901',
+    fullName: 'Khushpal Singh',
+    mobile: '9912345678',
+    vehicleNumber: 'PB-10-XX-1200',
+    vehicleType: 'Mahindra Bolero Maxi Reefer',
+    vehicleCapacity: 1250,
+    refrigerationType: 'Refrigerated',
+    currentDistrict: 'Sangrur',
+    currentLocation: 'Sangrur',
+    coordinates: { lat: 30.25, lng: 75.845 },
+    typicalRoute: 'Ludhiana → Khanna Grain Mandi',
+    routeDestination: 'Khanna Grain Market',
+    password: 'demo123',
+    verified: true,
+    available: true,
+  };
+
+  saveFarmers([...getFarmers().filter((f) => f.id !== demoFarmer.id), demoFarmer]);
+  saveDrivers([...getDrivers().filter((d) => d.id !== demoDriver.id), demoDriver]);
+
+  // clear old test requests and trips, which can leave the driver page stuck
+  write(KEYS.requests, []);
+  write(KEYS.trips, []);
+  localStorage.setItem('kcc_demo', 'v2');
+}
+
+export function initStorage(): void {
+  if (!localStorage.getItem(KEYS.initialized)) {
+    write(KEYS.farmers, generateSeedFarmers());
+    write(KEYS.drivers, generateSeedDrivers());
+    write(KEYS.requests, []);
+    write(KEYS.trips, []);
+    localStorage.setItem(KEYS.initialized, 'true');
+  }
+  ensureDemoData();
+}
+
+// ---------------------------------------------------------------------------
 
 export function addFarmer(farmer: Farmer): void {
   const farmers = getFarmers();
@@ -120,16 +174,28 @@ export interface Session {
   userId: string;
 }
 
+// Session is stored per tab (sessionStorage), so a farmer and a driver
+// can be logged in at the same time in two tabs/windows of one browser.
+// Farmers, drivers, requests and trips stay shared through localStorage.
 export function setSession(session: Session): void {
-  write(KEYS.session, session);
+  try {
+    sessionStorage.setItem(KEYS.session, JSON.stringify(session));
+  } catch {
+    // ignore
+  }
 }
 
 export function getSession(): Session | null {
-  return read<Session | null>(KEYS.session, null);
+  try {
+    const raw = sessionStorage.getItem(KEYS.session);
+    return raw ? (JSON.parse(raw) as Session) : null;
+  } catch {
+    return null;
+  }
 }
 
 export function clearSession(): void {
-  localStorage.removeItem(KEYS.session);
+  sessionStorage.removeItem(KEYS.session);
 }
 
 export function getRequests(): TransportRequest[] {
